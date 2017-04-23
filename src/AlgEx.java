@@ -6,20 +6,17 @@ import java.util.*;
 public class AlgEx {
     private static class Station {
         int index;
-        int minIndexFrom;
         int type;
         double minCost;
 
         public Station() {
             index = -1;
-            minIndexFrom = -1;
             type = -1;
             minCost = Double.MAX_VALUE;
         }
 
-        public Station(int index, int minIndexFrom, int type, double minCost) {
+        public Station(int index, int type, double minCost) {
             this.index = index;
-            this.minIndexFrom = minIndexFrom;
             this.type = type;
             this.minCost = minCost;
         }
@@ -103,17 +100,15 @@ public class AlgEx {
         }
         towns[from].roads.forEach(road -> {
             indexTownTo = (road.indexTownA != from) ? road.indexTownA : road.indexTownB;
-            stations.add(new Station(indexTownTo, from, road.type, 1.1 * road.cost));
+            stations.add(new Station(indexTownTo, road.type, 1.1 * road.cost));
         });
-        towns[from].stations[0].minIndexFrom = from;
-        towns[from].stations[1].minIndexFrom = from;
         while ((stationCur = stations.poll()) != null) {
             if (towns[stationCur.index].stations[stationCur.type].minCost == Double.MAX_VALUE) {
                 towns[stationCur.index].stations[stationCur.type] = stationCur;
                 towns[stationCur.index].roads.forEach(road -> {
                     indexTownTo = (road.indexTownA != stationCur.index) ? road.indexTownA : road.indexTownB;
                     if (towns[indexTownTo].stations[road.type].minCost == Double.MAX_VALUE) {
-                        stations.add(new Station(indexTownTo, stationCur.index, road.type,
+                        stations.add(new Station(indexTownTo, road.type,
                                 (stationCur.type == road.type) ? stationCur.minCost + road.cost : stationCur.minCost + road.cost * 1.1));
                     }
                 });
@@ -122,7 +117,7 @@ public class AlgEx {
                 break;
             }
         }
-        if (towns[to].stations[0].minIndexFrom != -1 || towns[to].stations[1].minIndexFrom != -1) {
+        if (towns[to].stations[0].minCost != Double.MAX_VALUE || towns[to].stations[1].minCost != Double.MAX_VALUE) {
             writer.println("Yes");
             writer.format(Locale.US, "%.2f", Math.min(towns[to].stations[0].minCost, towns[to].stations[1].minCost));
         } else {
